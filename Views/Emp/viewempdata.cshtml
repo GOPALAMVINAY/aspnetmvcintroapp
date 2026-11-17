@@ -1,0 +1,173 @@
+﻿
+@{
+//ViewBag["title"] = "viewempdata"; 
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>viewempdata</title>
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h2>Employee Details</h2>
+
+    <div style="margin-bottom: 15px;">
+        <label style="font-size: 18px; margin-right: 10px;">Employee Data</label>
+        <input type="text"
+               id="txtSearch"
+               class="form-control"
+               placeholder="Search"
+               style="width: 300px; display: inline-block; margin-right: 8px;">
+        <input type="button" id="btnSearch" value="Search" class="btn btn-primary" >
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>empid</th>
+                    <th>empname</th>
+                    <th>doj</th>
+                    <th>emptype</th>
+                    <th>mobileno</th>
+                    <th></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1;}
+                @foreach (aspnetmvcintroapp.Models.employee rec in ViewBag.empList)
+                {
+                    <tr row_id="@i">
+                        <td id="empid_@i">@rec.empid</td>
+                        <td class="row_data" id="ename_@i">@rec.ename</td>
+                        <td class="row_data" id="edj_@i">@rec.dj</td>
+                        <td class="row_data" id="etype_@i">@rec.etype</td>
+                        <td class="row_data" id="emobile_@i">@rec.mbnumber</td>
+                        <td>
+                            <a href="/Emp/Index" class="btn btn-success btn-sm">CREATE</a>
+                        </td>
+                        <td class="row_data">
+                            <input type="button" id="btnedit" value="Edit" class="btn btn-primary btn-sm" />
+                            <input type="button" style="display:none;" id="btnsave" value="Save" class="btn btn-info btn-sm" />
+                            <input type="button" style="display:none;" id="btncancel" value="Cancel" class="btn btn-warning btn-sm" />
+                            <input type="button" id="btndelete" value="Delete" class="btn btn-danger btn-sm" />
+                        </td>
+                    </tr>
+                    i = i + 1;
+                }
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+</body>
+</html><script type="text/javascript">
+
+    $(document).on('click', '#btnedit', function (event) {
+
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+
+        tbl_row.find('.row_data')
+            .attr('contenteditable', 'true')
+            .addClass('bg-warning');
+
+        tbl_row.find('#btnedit').hide();
+
+        tbl_row.find('#btnsave').show();
+        tbl_row.find('#btncancel').show();
+
+    });
+    $(document).on('click', '#btnsave', function (event) {
+
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+
+        var empid = $('#empid_' + row_id).html();
+        var ename = $("#ename_" + row_id).html();
+        var edoj = $("#edj_" + row_id).html();
+        var etypeTest = $('#etype_' + row_id).html();
+        var mobile = $('#emobile_' + row_id).html();
+
+        var updateData = {
+            empid: empid,
+            ename: ename,
+            dj: edoj,
+            etype: etypeTest,
+            mbnumber: mobile
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/Emp/Update",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(updateData),
+            dataType: "json",
+
+            success: function (msg) {
+                if (msg == "abc") {
+                    alert("Data saved successfully");
+                    window.location.href = "/Emp/viewempdata";
+                }
+                else {
+                    alert("Some error in code. Please check");
+                }
+            },
+
+            error: function (req, status, error) {
+                alert("Error try again");
+            }
+        });
+
+    });
+    $(document).on('click', '#btncancel', function (event) {
+        window.location.href = "/Emp/viewempdata";
+    });
+    $(document).on('click', '#btndelete', function (event) {
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+
+        var empid = $('#empid_' + row_id).html();
+        var deleteData = {
+            empid: empid,
+        };
+        $.ajax({
+            type: "POST",
+            url: "/Emp/Delete",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(deleteData),
+            dataType: "json",
+
+            success: function (msg) {
+                if (msg == "dc") {
+                    alert("Data Deleted successfully");
+                    window.location.href = "/Emp/viewempdata";
+                }
+                else {
+                    alert("Some error in code. Please check");
+                }
+            },
+
+            error: function (req, status, error) {
+                alert("Error try again");
+            }
+        });
+
+
+    });
+
+    $(document).on('click', '#btnSearch', function (event) {
+        var search = $('#txtSearch').val();
+        var filter = 1;
+        window.location.href = '/Emp/viewempdata?search=' + search + '&filter=' + filter;
+    });
+</script>
